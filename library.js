@@ -88,6 +88,7 @@ OAuth.loadStrategies = async (strategies) => {
 		clientSecret,
 		callbackURL,
 		passReqToCallback: true,
+		skipUserProfile: true,
 	}, async (req, token, secret, profile, done) => {
 		const { id, displayName, email, email_verified } = profile;
 		if (![id, displayName, email].every(Boolean)) {
