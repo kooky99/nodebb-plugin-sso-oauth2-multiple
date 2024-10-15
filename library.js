@@ -90,17 +90,17 @@ OAuth.loadStrategies = async (strategies) => {
 		passReqToCallback: true,
 		skipUserProfile: true,
 	}, async (req, token, secret, profile, done) => {
-		const { id, displayName, email, email_verified } = profile;
-		if (![id, displayName, email].every(Boolean)) {
+		const { sub, name, email } = profile;
+		if (![sub, name, email].every(Boolean)) {
 			return done(new Error('insufficient-scope'));
 		}
 		try {
 			const user = await OAuth.login({
 				name,
-				oAuthid: id,
-				handle: displayName,
+				oAuthid: sub,
+				handle: name,
 				email,
-				email_verified,
+			//	email_verified,
 			});
 			winston.verbose(`[plugin/sso-oauth2-multiple] Successful login to uid ${user.uid} via ${name} (remote id ${id})`);
 			await authenticationController.onSuccessfulLogin(req, user.uid);
@@ -182,7 +182,7 @@ OAuth.parseUserReturn = async (provider, profile) => {
 		picture,
 		roles,
 		email,
-		email_verified,
+		email_verified: email_verified || true,
 	};
 
 	if (forceUsernameViaEmail || (!normalized.displayName && email && usernameViaEmail === 'on')) {
