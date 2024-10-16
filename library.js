@@ -130,10 +130,10 @@ OAuth.loadStrategies = async (strategies) => {
 		}
 		try {
 			const user = await OAuth.login({
-				name,
+				name: name,
 				oAuthid: id,
 				handle: name,
-				email,
+				email: email,
 			//	email_verified,
 			});
 			winston.verbose(`[plugin/sso-oauth2-multiple] Successful login to uid ${user.uid} via ${name} (remote id ${id})`);
