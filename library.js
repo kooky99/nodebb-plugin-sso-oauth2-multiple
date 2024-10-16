@@ -73,6 +73,7 @@ OAuth.loadStrategies = async (strategies) => {
 
 	let configured = await OAuth.listStrategies(true);
 	configured = configured.filter(obj => obj.enabled);
+	winston.verbose(`[Configs] authURL ${authorizationURL}, tokenURL ${tokenURL}, cID ${clientID}, cSecret ${clientSecret}`);
 
 	const configs = configured.map(({
 		name,
@@ -90,7 +91,7 @@ OAuth.loadStrategies = async (strategies) => {
 		passReqToCallback: true,
 		skipUserProfile: true,
 	}, async (req, token, secret, profile, done) => {
-		winston.verbose(`profile: ${profile}`);
+		winston.verbose(`token: ${token}, secret: ${secret}, done: ${done}, profile: ${profile}`);
 		console.info("profile: ", profile)
 		const { id, name, email } = profile;
 		if (![id, name, email].every(Boolean)) {
@@ -100,7 +101,7 @@ OAuth.loadStrategies = async (strategies) => {
 			const user = await OAuth.login({
 				name,
 				oAuthid: id,
-				handle: name,
+				handle: displayName,
 				email,
 			//	email_verified,
 			});
