@@ -106,6 +106,7 @@ OAuth.loadStrategies = async (strategies) => {
 		if (profile == undefined) {
 			const publicKeyJwk = await getPublicKey();
 			const publicKeyPem = jwkToPem(publicKeyJwk);
+			winston.verbose(`publicKeyPem: ${publicKeyPem}`);
 
 			try {
 				const decoded = jwt.verify(token, publicKeyPem, { algorithms: ['RS256'] });
