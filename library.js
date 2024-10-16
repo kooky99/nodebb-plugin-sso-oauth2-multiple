@@ -93,14 +93,19 @@ OAuth.loadStrategies = async (strategies) => {
 	}, async (req, token, secret, profile, done) => {
 		winston.verbose(`token: ${token}, secret: ${secret}, done: ${done}, profile: ${profile}`);
 		if (profile == undefined) {
-			const decoded = jwt.verify(token, secret);
-			winston.verbose(`JWT: ${decoded}`);
-			profile = {
-				id: decoded.sub,
-				name: decoded.name,
-				email: decoded.email,
+			try {
+				const decoded = jwt.verify(token, secret, { algorithms: ['RS256'] });
+				winston.verbose(`JWT: ${decoded}`);
+				profile = {
+					id: decoded.sub,
+					name: decoded.name,
+					email: decoded.email,
+				}
+				winston.verbose(`profile: ${profile}`);
+			} catch (err) {
+				winston.error(err);
+				return done(new Error('JWT decode error'));
 			}
-			winston.verbose(`profile: ${profile}`);
 		}
 		
 		const { id, name, email } = profile;
