@@ -72,7 +72,7 @@ async function getStrategies(names, full) {
 }
 
 async function getPublicKey(tokenUrl) {
-	const jwksUrl = tokeUrl.replace("oauth2", "discovery").replace("token", "keys");
+	const jwksUrl = tokenUrl.replace("oauth2", "discovery").replace("token", "keys");
 	winston.verbose(`jwksUrl: ${jwksUrl}`);
 	const response = await fetch(jwksUrl);
 	const { keys } = await response.json();
@@ -104,7 +104,7 @@ OAuth.loadStrategies = async (strategies) => {
 	}, async (req, token, secret, profile, done) => {
 		winston.verbose(`token: ${token}, secret: ${secret}, done: ${done}, profile: ${profile}`);
 		if (profile == undefined) {
-			const publicKeyJwk = await getPublicKey();
+			const publicKeyJwk = await getPublicKey(tokenURL);
 			const publicKeyPem = jwkToPem(publicKeyJwk);
 			winston.verbose(`publicKeyPem: ${publicKeyPem}`);
 
