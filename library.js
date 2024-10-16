@@ -117,7 +117,7 @@ OAuth.loadStrategies = async (strategies) => {
 				winston.verbose(`JWT: ${JSON.stringify(decoded)}`);
 				profile = {
 					id: decoded.sub,
-					name: decoded.name,
+					displayName: decoded.name,
 					email: decoded.email,
 				}
 				winston.verbose(`profile: ${JSON.stringify(profile)}`);
@@ -127,18 +127,18 @@ OAuth.loadStrategies = async (strategies) => {
 			}
 		}
 		
-		const { id, name, email } = profile;
-		winston.verbose(`id: ${id}, name: ${name}, email: ${email}`)
-		if (![id, name, email].every(Boolean)) {
+		const { id, displayName, email } = profile;
+		winston.verbose(`id: ${id}, displayName: ${displayName}, email: ${email}`)
+		if (![id, displayName, email].every(Boolean)) {
 			return done(new Error('insufficient-scope'));
 		}
 		try {
 			const user = await OAuth.login({
 				name,
 				oAuthid: id,
-				handle: name,
+				handle: displayName,
 				email,
-			//	email_verified,
+				email_verified: true,
 			});
 			winston.verbose(`[plugin/sso-oauth2-multiple] Successful login to uid ${user.uid} via ${name} (remote id ${id})`);
 			await authenticationController.onSuccessfulLogin(req, user.uid);
