@@ -90,6 +90,8 @@ OAuth.loadStrategies = async (strategies) => {
 		passReqToCallback: true,
 		skipUserProfile: true,
 	}, async (req, token, secret, profile, done) => {
+		winston.verbose(`profile: ${profile}`);
+		console.info("profile: ", profile)
 		const { id, name, email } = profile;
 		if (![id, name, email].every(Boolean)) {
 			return done(new Error('insufficient-scope'));
