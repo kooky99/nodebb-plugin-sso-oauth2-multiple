@@ -57,6 +57,7 @@ OAuth.listStrategies = async (full) => {
 };
 
 OAuth.getStrategy = async (name) => {
+	winston.verbose(`[getStrategy] name: ${name}`);
 	const strategies = await getStrategies([name], true);
 	return strategies.length ? strategies[0] : null;
 };
@@ -128,7 +129,7 @@ OAuth.loadStrategies = async (strategies) => {
 		}
 		
 		const { id, displayName, email } = profile;
-		winston.verbose(`id: ${id}, displayName: ${displayName}, email: ${email}`)
+		winston.verbose(`id: ${id}, displayName: ${displayName}, email: ${email}`);
 		if (![id, displayName, email].every(Boolean)) {
 			return done(new Error('insufficient-scope'));
 		}
@@ -155,6 +156,7 @@ OAuth.loadStrategies = async (strategies) => {
 	configs.forEach((strategy, idx) => {
 		strategy.userProfile = OAuth.getUserProfile.bind(strategy, configured[idx].name, configured[idx].userRoute);
 		passport.use(configured[idx].name, strategy);
+		winston.verbose(`[UserProfile] password.use name: ${configured[idx].name}, strategy: ${JSON.stringify(strategy)}`);
 	});
 
 	strategies.push(...configured.map(({ name, scope, loginLabel, registerLabel, faIcon }) => ({
@@ -189,6 +191,7 @@ OAuth.getUserProfile = function (name, userRoute, accessToken, done) {
 
 		try {
 			const json = JSON.parse(body);
+			winston.verbose(`[getUserProfile] name: ${name}, json: ${JSON.stringify(json)}`);
 			const profile = await OAuth.parseUserReturn(name, json);
 			profile.provider = name;
 			done(null, profile);
@@ -249,26 +252,32 @@ OAuth.getAssociations = async () => {
 };
 
 OAuth.login = async (payload) => {
+	winston.verbose(`[login] payload: ${JSON.stringify(payload)}`)
 	let uid = await OAuth.getUidByOAuthid(payload.name, payload.oAuthid);
 	if (uid !== null) {
 		// Existing User
+		winston.verbose(`[login] ExistingUser uid: ${uid}`);
 		return ({ uid });
 	}
 
+	winston.verbose(`[login] need to create user.`);
 	const { trustEmailVerified } = await OAuth.getStrategy(payload.name);
 	const { email } = payload;
 	const email_verified =
 		parseInt(trustEmailVerified, 10) &&
 		(payload.email_verified || payload.email_verified === true);
-
+	winston.verbose(`[login] email_verified payload: ${payload.email_verified}, email_verified: ${email_verified}`);
 
 	// Check for user via email fallback
 	if (email && email_verified) {
 		uid = await user.getUidByEmail(payload.email);
+		winston.verbose(`[login] UID: ${uid}`);
 	}
 
+	winston.verbose(`[login] UID Final: ${uid}`);
 	if (!uid) {
 		// New user
+		winston.verbose(`[login] Create user: ${uid}`);
 		uid = await user.create({
 			username: payload.handle,
 		});
