@@ -64,7 +64,9 @@ OAuth.getStrategy = async (name) => {
 async function getStrategies(names, full) {
 	winston.verbose(`[getStrategies] names: ${JSON.stringify(names)}, full: ${full}`);
 	const strategies = await db.getObjects(names.map(name => `oauth2-multiple:strategies:${name}`), full ? undefined : ['enabled']);
+	winston.verbose(`[getStrategies] strategies: ${JSON.stringify(strategies)}`);
 	strategies.forEach((strategy, idx) => {
+		winston.verbose(`[getStrategies] forEach strategy: ${JSON.stringify(strategy)}, idx: ${idx}`);
 		strategy.name = names[idx];
 		strategy.enabled = strategy.enabled === 'true' || strategy.enabled === true;
 		strategy.callbackUrl = `${nconf.get('url')}/auth/${names[idx]}/callback`;
