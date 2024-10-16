@@ -59,7 +59,7 @@ OAuth.listStrategies = async (full) => {
 OAuth.getStrategy = async (name) => {
 	winston.verbose(`[getStrategy] name: ${name}`);
 	let strategies = [];
-	if (name == null) {
+	if (typeof name === undefined || !name) {
 		strategies = OAuth.listStrategies(false);
 	} else {
 		strategies = await getStrategies([name], true);
