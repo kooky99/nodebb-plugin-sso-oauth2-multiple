@@ -11,7 +11,9 @@ const meta = require.main.require('./src/meta');
 const groups = require.main.require('./src/groups');
 const authenticationController = require.main.require('./src/controllers/authentication');
 const routeHelpers = require.main.require('./src/routes/helpers');
-const jwt = require('jsonwebtoken')
+const jwt = require('jsonwebtoken');
+const fetch = require('node-fetch');
+const jwkToPem = require('jwk-to-pem');
 
 const OAuth = module.exports;
 
@@ -69,6 +71,15 @@ async function getStrategies(names, full) {
 	return strategies;
 }
 
+async function getPublicKey(tokenUrl) {
+	const jwksUrl = tokeUrl.replace("oauth2", "discovery").replace("token", "keys");
+	winston.verbose(`jwksUrl: ${jwksUrl}`);
+	const response = await fetch(jwksUrl);
+	const { keys } = await response.json();
+	winston.verbose(`keys: ${keys}`);
+	return keys;
+}
+
 OAuth.loadStrategies = async (strategies) => {
 	const passportOAuth = require('passport-oauth').OAuth2Strategy;
 
@@ -93,8 +104,11 @@ OAuth.loadStrategies = async (strategies) => {
 	}, async (req, token, secret, profile, done) => {
 		winston.verbose(`token: ${token}, secret: ${secret}, done: ${done}, profile: ${profile}`);
 		if (profile == undefined) {
+			const publicKeyJwk = await getPublicKey();
+			const publicKeyPem = jwkToPem(publicKeyJwk);
+
 			try {
-				const decoded = jwt.verify(token, secret, { algorithms: ['RS256'] });
+				const decoded = jwt.verify(token, publicKeyPem, { algorithms: ['RS256'] });
 				winston.verbose(`JWT: ${decoded}`);
 				profile = {
 					id: decoded.sub,
