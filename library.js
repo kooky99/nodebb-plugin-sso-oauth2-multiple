@@ -51,6 +51,7 @@ OAuth.addAdminNavigation = (header) => {
 OAuth.listStrategies = async (full) => {
 	const names = await db.getSortedSetMembers('oauth2-multiple:strategies');
 	names.sort();
+	winston.verbose(`[listStrategies] names: ${JSON.stringify(names)}`);
 
 	return await getStrategies(names, full);
 };
@@ -61,6 +62,7 @@ OAuth.getStrategy = async (name) => {
 };
 
 async function getStrategies(names, full) {
+	winston.verbose(`[getStrategies] names: ${JSON.stringify(names)}, full: ${full}`);
 	const strategies = await db.getObjects(names.map(name => `oauth2-multiple:strategies:${name}`), full ? undefined : ['enabled']);
 	strategies.forEach((strategy, idx) => {
 		strategy.name = names[idx];
@@ -104,11 +106,11 @@ OAuth.loadStrategies = async (strategies) => {
 	}, async (req, token, secret, profile, done) => {
 		winston.verbose(`token: ${token}, secret: ${secret}, done: ${done}, profile: ${profile}`);
 		if (profile == undefined) {
-			const publicKeyJwk = await getPublicKey(tokenURL);
-			const publicKeyPem = jwkToPem(publicKeyJwk);
-			winston.verbose(`publicKeyPem: ${publicKeyPem}`);
-
 			try {
+				const publicKeyJwk = await getPublicKey(tokenURL);
+				const publicKeyPem = jwkToPem(publicKeyJwk);
+				winston.verbose(`publicKeyPem: ${publicKeyPem}`);
+	
 				const decoded = jwt.verify(token, publicKeyPem, { algorithms: ['RS256'] });
 				winston.verbose(`JWT: ${JSON.stringify(decoded)}`);
 				profile = {
@@ -130,10 +132,10 @@ OAuth.loadStrategies = async (strategies) => {
 		}
 		try {
 			const user = await OAuth.login({
-				name: name,
+				name,
 				oAuthid: id,
 				handle: name,
-				email: email,
+				email,
 			//	email_verified,
 			});
 			winston.verbose(`[plugin/sso-oauth2-multiple] Successful login to uid ${user.uid} via ${name} (remote id ${id})`);
