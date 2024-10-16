@@ -131,7 +131,7 @@ OAuth.loadStrategies = async (strategies) => {
 			const user = await OAuth.login({
 				name,
 				oAuthid: id,
-				handle: displayName,
+				handle: name,
 				email,
 			//	email_verified,
 			});
