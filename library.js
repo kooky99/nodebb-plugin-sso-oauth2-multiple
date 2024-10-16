@@ -58,7 +58,14 @@ OAuth.listStrategies = async (full) => {
 
 OAuth.getStrategy = async (name) => {
 	winston.verbose(`[getStrategy] name: ${name}`);
-	const strategies = await getStrategies([name], true);
+	let strategies = [];
+	if (name == null) {
+		strategies = OAuth.listStrategies(false);
+	} else {
+		strategies = await getStrategies([name], true);
+	}
+
+	winston.verbose(`[getStrategy] strategies: ${JSON.stringify(strategies)}`);
 	return strategies.length ? strategies[0] : null;
 };
 
