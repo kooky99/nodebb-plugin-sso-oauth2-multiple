@@ -73,7 +73,6 @@ OAuth.loadStrategies = async (strategies) => {
 
 	let configured = await OAuth.listStrategies(true);
 	configured = configured.filter(obj => obj.enabled);
-	winston.verbose(`[Configs] authURL ${authorizationURL || NULL}, tokenURL ${tokenURL || NULL}, cID ${clientID || NULL}, cSecret ${clientSecret || NULL}`);
 
 	const configs = configured.map(({
 		name,
