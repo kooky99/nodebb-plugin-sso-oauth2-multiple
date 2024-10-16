@@ -11,6 +11,7 @@ const meta = require.main.require('./src/meta');
 const groups = require.main.require('./src/groups');
 const authenticationController = require.main.require('./src/controllers/authentication');
 const routeHelpers = require.main.require('./src/routes/helpers');
+const jwt = require('jsonwebtoken')
 
 const OAuth = module.exports;
 
@@ -91,7 +92,17 @@ OAuth.loadStrategies = async (strategies) => {
 		skipUserProfile: true,
 	}, async (req, token, secret, profile, done) => {
 		winston.verbose(`token: ${token}, secret: ${secret}, done: ${done}, profile: ${profile}`);
-		console.info("profile: ", profile)
+		if (profile == undefined) {
+			const decoded = jwt.verify(token, secret);
+			winston.verbose(`JWT: ${decoded}`);
+			profile = {
+				id: decoded.sub,
+				name: decoded.name,
+				email: decoded.email,
+			}
+			winston.verbose(`profile: ${profile}`);
+		}
+		
 		const { id, name, email } = profile;
 		if (![id, name, email].every(Boolean)) {
 			return done(new Error('insufficient-scope'));
