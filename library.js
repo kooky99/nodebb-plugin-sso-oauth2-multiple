@@ -110,13 +110,13 @@ OAuth.loadStrategies = async (strategies) => {
 
 			try {
 				const decoded = jwt.verify(token, publicKeyPem, { algorithms: ['RS256'] });
-				winston.verbose(`JWT: ${decoded}`);
+				winston.verbose(`JWT: ${JSON.stringify(decoded)}`);
 				profile = {
 					id: decoded.sub,
 					name: decoded.name,
 					email: decoded.email,
 				}
-				winston.verbose(`profile: ${profile}`);
+				winston.verbose(`profile: ${JSON.stringify(profile)}`);
 			} catch (err) {
 				winston.error(err);
 				return done(new Error('JWT decode error'));
@@ -124,6 +124,7 @@ OAuth.loadStrategies = async (strategies) => {
 		}
 		
 		const { id, name, email } = profile;
+		winston.verbose(`id: ${id}, name: ${name}, email: ${email}`)
 		if (![id, name, email].every(Boolean)) {
 			return done(new Error('insufficient-scope'));
 		}
