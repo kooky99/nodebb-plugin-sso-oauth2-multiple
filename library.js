@@ -90,14 +90,14 @@ OAuth.loadStrategies = async (strategies) => {
 		passReqToCallback: true,
 		skipUserProfile: true,
 	}, async (req, token, secret, profile, done) => {
-		const { sub, name, email } = profile;
-		if (![sub, name, email].every(Boolean)) {
+		const { oid, name, email } = profile;
+		if (![oid, name, email].every(Boolean)) {
 			return done(new Error('insufficient-scope'));
 		}
 		try {
 			const user = await OAuth.login({
 				name,
-				oAuthid: sub,
+				oAuthid: oid,
 				handle: name,
 				email,
 			//	email_verified,
