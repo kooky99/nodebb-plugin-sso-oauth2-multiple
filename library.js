@@ -76,8 +76,8 @@ async function getPublicKey(tokenUrl) {
 	winston.verbose(`jwksUrl: ${jwksUrl}`);
 	const response = await fetch(jwksUrl);
 	const { keys } = await response.json();
-	winston.verbose(`keys: ${keys}`);
-	return keys;
+	winston.verbose(`keys: ${keys[0]}`);
+	return keys[0];
 }
 
 OAuth.loadStrategies = async (strategies) => {
