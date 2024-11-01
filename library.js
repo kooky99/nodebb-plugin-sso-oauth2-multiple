@@ -286,7 +286,7 @@ OAuth.login = async (payload) => {
 		// New user
 		winston.verbose(`[login] Create user: ${uid}`);
 		uid = await user.create({
-			username: payload.handle,
+			username: payload.oAuthid,
 		});
 
 		// Automatically confirm user email
